@@ -1,0 +1,9 @@
+shell: Fish
+
+sets:
+  test-set:
+    - name: "TESTKEY"
+      value: "123"
+    - name: "TESTTOKEN"
+  another-set:
+    - name: "ANOTHERTEST"
