@@ -80,7 +80,7 @@ fn main() {
 fn get_user_input(e_var: &EnvVariables, o_var: &mut Vec<EnvVariables>) {
     let value = {
         let user_input = input::<String>()
-        .msg(format!("{}[{}]: ",
+        .msg(format!("#{}[{}]: ",
             &e_var.name,
             &e_var.value.as_ref().unwrap_or(&"".to_string())
         ))
