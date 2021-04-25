@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Torben <xendios@gmail.com>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -14,3 +15,16 @@ serde_derive = "1.0"
 serde = "1.0"
 read_input = "0.8"
 color-eyre = "0.5"
+
+[package.metadata.deb]
+maintainer = "Torben Diegel <xendios@gmail.com>"
+license-file = ["LICENSE-MIT", "0"]
+extended-description = """\
+Given configured sets with names and otional default values, set environment variables with user queried values"""
+depends = "$auto"
+section = "utility"
+priority = "optional"
+assets = [
+    ["target/release/env-setter", "usr/bin/", "755"],
+    ["README.md", "usr/share/doc/env-setter/README", "644"],
+]
