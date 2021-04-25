@@ -8,6 +8,7 @@ use clap::{
 };
 
 use read_input::prelude::*;
+use color_eyre::eyre::Result;
 
 use std::{borrow::BorrowMut, collections::HashMap};
 use serde_derive::{
@@ -25,7 +26,6 @@ struct Config {
 struct EnvVariables {
     name: String,
     value: Option<String>,
-
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -43,13 +43,21 @@ fn main() {
                             .short("c")
                             .long("config")
                             .help("path to configfile")
-                            .default_value(".config/env-setter.yaml")
-                            .index(2))
+                            .default_value(".config/env-setter.yaml"))
                         .arg(Arg::with_name("env-set")
                             .short("e")
                             .long("env-set")
-                            .index(1)
-                            .help("Env set to use"))
+                            .help("Env set to use")
+                            .takes_value(true))
+                        .arg(Arg::with_name("pipe")
+                            .short("f")
+                            .long("file")
+                            .default_value("/tmp/set-env")
+                            .help("output file with env set"))
+                        .arg(Arg::with_name("stdout")
+                            .short("s")
+                            .long("stdout")
+                            .help("print variable commands to stdout"))
                         .get_matches();
     let configfile = matches.value_of("config").unwrap();
     let env_set = matches.value_of("env-set").unwrap().to_owned();
@@ -65,13 +73,29 @@ fn main() {
                     .get_key_value(&env_set);
     let mut var_output: Vec<EnvVariables> = Vec::new();
 
+    let output: Box<dyn std::io::Write> = {
+        if matches.is_present("stdout") {
+            Box::new(std::io::stdout())
+        } else {
+            let file = std::fs::File::create(
+                matches
+                        .value_of("pipe")
+                        .unwrap())
+                .expect("Failed to create pipe");
+
+            Box::new(std::io::BufWriter::new(file))
+        }
+    };
+
     match var_set {
         Some((set, vec_var)) => {
             println!("using variable set {}", set);
             for var in vec_var {
                 get_user_input(var, var_output.borrow_mut());
             }
-            print_variables(&var_output, config.shell);
+            if let Err(err) = print_variables(&var_output, config.shell, output) {
+                eprintln!("Could not print variables: {}", err);
+            }
         },
         None => println!("No variable set named {} found", env_set)
     }
@@ -116,24 +140,31 @@ fn get_user_input(e_var: &EnvVariables, o_var: &mut Vec<EnvVariables>) {
     }
 }
 
-fn print_variables (var_list: &Vec<EnvVariables>, shell: Shell) {
+fn print_variables<T> (var_list: &Vec<EnvVariables>, shell: Shell, mut destination: T) -> Result<()>
+where T: std::io::Write
+{
+    let mut buffer: Vec<String> = Vec::new();
     match shell {
         Shell::Fish => {
             for var in var_list {
-                println!(
+                buffer.push(format!(
                     "set {} {}",
                     var.name.to_ascii_uppercase(),
-                    var.value.clone().unwrap());
+                    var.value.clone().unwrap()
+                ));
             }
         },
         Shell::Posix => {
             for var in var_list {
-                println!(
+                buffer.push(format!(
                     "{}={}",
                     var.name.to_uppercase(),
                     var.value.clone().unwrap()
-                )
+                ));
             }
         },
     }
+    destination.write(buffer.join("\n").as_bytes())?;
+    destination.flush()?;
+    Ok(())
 }
