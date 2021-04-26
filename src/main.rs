@@ -9,7 +9,6 @@ use clap::{
 
 use read_input::prelude::*;
 use color_eyre::eyre::Result;
-
 use std::{borrow::BorrowMut, collections::HashMap};
 use serde_derive::{
     Serialize,
@@ -18,7 +17,7 @@ use serde_derive::{
 
 #[derive(Debug, Serialize, Deserialize)]
 struct Config {
-    shell: Shell,
+    shell: Option<Shell>,
     sets: HashMap<String,Vec<EnvVariables>>,
 }
 
@@ -62,11 +61,15 @@ fn main() {
     let configfile = matches.value_of("config").unwrap();
     let env_set = matches.value_of("env-set").unwrap().to_owned();
 
-    let config = {
+    let mut config = {
         let mut configger = config::Config::default();
         configger.merge(config::File::with_name(configfile)).unwrap();
         configger.try_into::<Config>().unwrap()
     };
+
+    if config.shell.is_none() {
+        config.shell = Some(Shell::Posix);
+    }
 
     let var_set = config
                     .sets
@@ -93,7 +96,7 @@ fn main() {
             for var in vec_var {
                 get_user_input(var, var_output.borrow_mut());
             }
-            if let Err(err) = print_variables(&var_output, config.shell, output) {
+            if let Err(err) = print_variables(&var_output, config.shell.unwrap(), output) {
                 eprintln!("Could not print variables: {}", err);
             }
         },
