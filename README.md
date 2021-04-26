@@ -14,6 +14,7 @@ env-setter --config resources/test.yaml --env-set test-set && source /tmp/set-en
 ```
 
 That uses the example config in resources and has the following content:
+
 ```yaml
 shell: Fish
 
@@ -31,3 +32,24 @@ Under *sets* you can find two sets with one variable defining a default value.
 
 The example yaml shows the possibilities for variables. There we have two sets named _test-set_ and _another-set_. Our example execution called the _test-set_, which has two variables.
 First one with the name _TESTKEY_ and a default value of "123". The default value is optional.
+
+## Arguments
+
+The help flag gives:
+
+```sh
+USAGE:
+    env-setter [FLAGS] [OPTIONS]
+
+FLAGS:
+    -h, --help       Prints help information
+    -s, --stdout     print variable commands to stdout
+    -V, --version    Prints version information
+
+OPTIONS:
+    -c, --config <config>      path to configfile [default: .config/env-setter.yaml]
+    -e, --env-set <env-set>    Env set to use
+    -f, --file <pipe>          output file with env set [default: /tmp/set-env]
+```
+
+The options are self explanatory, but one point to remember is that the stdout flag superseeds the file argument.
