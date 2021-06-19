@@ -28,6 +28,12 @@ struct Config {
 }
 
 fn main() {
+    let default_config = {
+        let home = std::env::var("HOME").unwrap_or(String::from("~"));
+        let path_config = format!("{}/.config/env-setter.yaml", home);
+        path_config
+    };
+
     let matches = App::new(crate_name!())
                         .version(crate_version!())
                         .author(crate_authors!())
@@ -36,7 +42,7 @@ fn main() {
                             .short("c")
                             .long("config")
                             .help("path to configfile")
-                            .default_value(".config/env-setter.yaml"))
+                            .default_value(default_config.as_str()))
                         .subcommand(SubCommand::with_name("list"))
                         .subcommand(SubCommand::with_name("set")
                                 .about("set a variable set")
