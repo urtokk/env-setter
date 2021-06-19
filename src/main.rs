@@ -37,6 +37,7 @@ fn main() {
                             .long("config")
                             .help("path to configfile")
                             .default_value(".config/env-setter.yaml"))
+                        .subcommand(SubCommand::with_name("list"))
                         .subcommand(SubCommand::with_name("set")
                                 .about("set a variable set")
                                 .arg(Arg::with_name("env-set")
@@ -108,6 +109,11 @@ fn main() {
                     eprintln!("Could not print variables: {}", e);
                     std::process::exit(4)
                 }).ok();
+            }
+        },
+        Some("list") => {
+            for item in config.sets {
+                println!("{}", item.0);
             }
         },
         Some(s) => {
