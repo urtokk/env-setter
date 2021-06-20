@@ -11,6 +11,7 @@ use clap::{
 mod env_variables;
 mod init;
 mod configuration;
+mod set;
 
 fn main() {
     let default_config = {
@@ -54,47 +55,11 @@ fn main() {
         Some("set") => {
             let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
-            let env_set = matches.value_of("env-set").unwrap().to_owned();
-            let var_set = {
-                let set = config
-                .sets
-                .get_mut(&env_set);
+            set::set(&mut config.sets, config.shell, &matches).map_err(|e| {
+                eprintln!("Error setting environment: {}", e);
+                std::process::exit(6)
+            }).ok();
 
-                match set {
-                    Some(s) => s,
-                    None => {
-                        eprintln!("Set {} was not found", env_set);
-                        std::process::exit(2);
-                    }
-                }
-            };
-
-            let mut output: Box<dyn std::io::Write> = {
-                if matches.is_present("stdout") {
-                    Box::new(std::io::stdout())
-                } else {
-                    let path = matches.value_of("pipe").unwrap();
-                    let file = std::fs::File::create(path);
-
-                    if let Ok(f) = file {
-                        Box::new(std::io::BufWriter::new(f))
-                    } else {
-                        eprintln!("Failed to create File: {}", path);
-                        std::process::exit(3);
-                    }
-                }
-            };
-            for item in var_set.iter_mut() {
-                item.ask_user_input();
-            }
-
-            for item in var_set {
-                item.print_variables(&config.shell, output.as_mut())
-                .map_err(|e| {
-                    eprintln!("Could not print variables: {}", e);
-                    std::process::exit(4)
-                }).ok();
-            }
         },
         Some("list") => {
             let config = configuration::get_config(configfile);
@@ -108,7 +73,7 @@ fn main() {
         Some(s) => {
             eprintln!("Subcommand {} not supported", s);
             println!("{}", matches.usage());
-            std::process::exit(5);
+            std::process::exit(2);
         },
         None => {
             println!("{}",matches.usage());
