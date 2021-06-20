@@ -8,24 +8,11 @@ use clap::{
     SubCommand,
 };
 
-use std::collections::HashMap;
-use serde_derive::{
-    Serialize,
-    Deserialize
-};
-
 mod env_variables;
+mod init;
+mod configuration;
 
-use env_variables::{
-    EnvVariables,
-    Shell
-};
-
-#[derive(Debug, Serialize, Deserialize)]
-struct Config {
-    shell: Option<Shell>,
-    sets: HashMap<String,Vec<EnvVariables>>,
-}
+use env_variables::Shell;
 
 fn main() {
     let default_config = {
@@ -59,21 +46,15 @@ fn main() {
                                 .short("s")
                                 .long("stdout")
                                 .help("print variable commands to stdout")))
+                        .subcommand(SubCommand::with_name("init")
+                            .about("Setup a easy example config"))
                         .get_matches();
+
     let configfile = matches.value_of("config").unwrap();
-
-    let mut config = {
-        let mut configger = config::Config::default();
-        configger.merge(config::File::with_name(configfile)).unwrap();
-        configger.try_into::<Config>().unwrap()
-    };
-
-    if config.shell.is_none() {
-        config.shell = Some(Shell::Posix);
-    }
 
     match matches.subcommand_name() {
         Some("set") => {
+            let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
             let env_set = matches.value_of("env-set").unwrap().to_owned();
             let var_set = {
@@ -110,7 +91,7 @@ fn main() {
             }
 
             for item in var_set {
-                item.print_variables(&config.shell.as_ref().unwrap(), output.as_mut())
+                item.print_variables(&config.shell, output.as_mut())
                 .map_err(|e| {
                     eprintln!("Could not print variables: {}", e);
                     std::process::exit(4)
@@ -118,15 +99,19 @@ fn main() {
             }
         },
         Some("list") => {
-            for item in config.sets {
+            let config = configuration::get_config(configfile);
+            for item in &config.sets {
                 println!("{}", item.0);
             }
+        },
+        Some("init") => {
+            init::init_config(configfile).ok();
         },
         Some(s) => {
             eprintln!("Subcommand {} not supported", s);
             println!("{}", matches.usage());
             std::process::exit(5);
-        }
+        },
         None => {
             println!("{}",matches.usage());
             std::process::exit(1);
