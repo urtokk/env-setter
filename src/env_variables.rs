@@ -14,8 +14,8 @@ pub enum Shell {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EnvVariables {
-    name: String,
-    value: Option<String>,
+    pub name: String,
+    pub value: Option<String>,
 }
 
 impl EnvVariables {
