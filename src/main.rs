@@ -12,8 +12,6 @@ mod env_variables;
 mod init;
 mod configuration;
 
-use env_variables::Shell;
-
 fn main() {
     let default_config = {
         let home = std::env::var("HOME").unwrap_or(String::from("~"));
