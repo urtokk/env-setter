@@ -27,11 +27,10 @@ impl EnvVariables {
         ))
         .get();
 
-        self.value = if user_input.is_empty() {
-            None
-        } else {
-            Some(user_input)
-        };
+        if !user_input.is_empty() {
+            self.value = Some(user_input)
+        }
+
         self
     }
 
