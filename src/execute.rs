@@ -9,8 +9,9 @@ use std::{
 use crate::env_variables::EnvVariables;
 
 
-pub fn execute(var_set: &Vec<EnvVariables>, command: &str) -> Result<String> {
-    for var in var_set.iter() {
+pub fn execute(var_set: &mut Vec<EnvVariables>, command: &str) -> Result<String> {
+    for var in var_set.iter_mut() {
+        var.ask_user_input();
         set_var(&var.name, var.value.as_ref().unwrap_or(&" ".to_owned()));
     }
 
