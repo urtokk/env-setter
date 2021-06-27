@@ -12,6 +12,8 @@ mod env_variables;
 mod init;
 mod configuration;
 mod set;
+mod execute;
+mod utils;
 
 fn main() {
     let default_config = {
@@ -31,8 +33,8 @@ fn main() {
                             .default_value(default_config.as_str()))
                         .subcommand(SubCommand::with_name("list"))
                         .subcommand(SubCommand::with_name("set")
-                                .about("set a variable set")
-                                .arg(Arg::with_name("env-set")
+                            .about("set a variable set")
+                            .arg(Arg::with_name("env-set")
                                 .index(1)
                                 .help("Env set to use")
                                 .takes_value(true))
@@ -47,6 +49,20 @@ fn main() {
                                 .help("print variable commands to stdout")))
                         .subcommand(SubCommand::with_name("init")
                             .about("Setup a easy example config"))
+                        .subcommand(SubCommand::with_name("execute")
+                            .about("execute provided command with target settings")
+                            .arg(Arg::with_name("target")
+                                .short("t")
+                                .long("target")
+                                .takes_value(true)
+                                .required(true)
+                                .help("Target set to use"))
+                            .arg(Arg::with_name("command")
+                                .short("c")
+                                .long("command")
+                                .takes_value(true)
+                                .required(true)
+                                .help("command to be executed")))
                         .get_matches();
 
     let configfile = matches.value_of("config").unwrap();
@@ -69,6 +85,29 @@ fn main() {
         },
         Some("init") => {
             init::init_config(configfile).ok();
+        },
+        Some("execute") => {
+            let mut config = configuration::get_config(configfile);
+            let matches = matches.subcommand_matches("execute").unwrap();
+            let target_set = {
+                let target = matches.value_of("target").unwrap();
+                match utils::get_target_set(&mut config.sets, target) {
+                    Ok(target) => target,
+                    Err(e) => {
+                        eprintln!("Could not determine target set: {}", e);
+                        std::process::exit(7)
+                    }
+                }
+            };
+            let command = matches.value_of("command").unwrap();
+            match execute::execute(target_set, command) {
+                Ok(output) => println!("{}",output),
+                Err(e) => {
+                    eprintln!("Could not execute command: {}", e);
+                    std::process::exit(8)
+                }
+            }
+
         },
         Some(s) => {
             eprintln!("Subcommand {} not supported", s);
