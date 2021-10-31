@@ -29,5 +29,9 @@ pub fn execute(var_set: &mut Vec<EnvVariables>, command: &str) -> Result<String>
 
     let output = execute_command.output()?;
 
-    Ok(String::from_utf8(output.stdout)?)
+    if output.status.success() {
+        Ok(String::from_utf8_lossy(&output.stdout).to_string())
+    } else {
+        Err(eyre!("Command failed: {}", String::from_utf8_lossy(&output.stderr)))
+    }
 }
