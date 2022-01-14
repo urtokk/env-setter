@@ -20,7 +20,7 @@ pub fn init_config(path: &str) -> Result<()> {
 
     let mut configfile = std::fs::File::create(path)?;
     let content = serde_yaml::to_string(&config)?;
-    configfile.write(content.as_bytes())?;
+    configfile.write_all(content.as_bytes())?;
     configfile.flush()?;
     Ok(())
 }

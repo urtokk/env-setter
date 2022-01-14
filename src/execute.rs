@@ -8,8 +8,8 @@ pub fn execute(var_set: &mut Vec<EnvVariables>, command: &str) -> Result<String>
         set_var(&var.name, var.value.as_ref().unwrap_or(&" ".to_owned()));
     }
 
-    let mut command_iter = command.split(" ");
-    let executable = match command_iter.nth(0) {
+    let mut command_iter = command.split(' ');
+    let executable = match command_iter.next() {
         Some(s) => s,
         None => return Err(eyre!("No command specified")),
     };

@@ -9,7 +9,7 @@ mod utils;
 
 fn main() {
     let default_config = {
-        let home = std::env::var("HOME").unwrap_or(String::from("~"));
+        let home = std::env::var("HOME").unwrap_or_else(|_| String::from("~"));
         let path_config = format!("{}/.config/env-setter.yaml", home);
         path_config
     };
@@ -78,7 +78,7 @@ fn main() {
         Some("set") => {
             let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
-            set::set(&mut config.sets, config.shell, &matches)
+            set::set(&mut config.sets, config.shell, matches)
                 .map_err(|e| {
                     eprintln!("Error setting environment: {}", e);
                     std::process::exit(6)

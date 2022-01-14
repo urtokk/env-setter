@@ -38,17 +38,17 @@ impl EnvVariables {
     {
         match shell {
             Shell::Fish => {
-                destination.write(
+                destination.write_all(
                     format!(
                         "set {} {}\n",
                         self.name.to_ascii_uppercase(),
-                        self.value.clone().unwrap_or(String::new())
+                        self.value.clone().unwrap_or_default(),
                     )
                     .as_bytes(),
                 )?;
             }
             Shell::Posix => {
-                destination.write(
+                destination.write_all(
                     format!(
                         "{}={}\n",
                         self.name.to_uppercase(),
