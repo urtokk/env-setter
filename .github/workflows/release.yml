@@ -1,0 +1,57 @@
+on:
+  push:
+    branches:
+      - main
+
+name: Release Packaging
+
+jobs:
+  release:
+    name: Release Packaging
+    env:
+      PROJECT_NAME_UNDERSCORE: rust_ci_github_actions_workflow
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - name: Security audit
+        uses: actions-rs/audit-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install cargo-deb crate
+        uses: actions-rs/install@v1
+        with:
+          name: cargo-deb
+          version: latest
+          use-tool-cache: true
+      - name: Release Build
+        uses: actions-rs/cargo@v1
+        with:
+          command: deb
+      - name: Create archive
+        run: tar cfz target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
+      - name: 'Upload Artifact'
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PROJECT_NAME_UNDERSCORE }}
+          path: target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).deb
+          mime-type: application/vnd.debian.binary-package
+      - name: Upload zip Artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.PROJECT_NAME_UNDERSCORE }}
+          path: target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz
+          mime-type: application/gzip

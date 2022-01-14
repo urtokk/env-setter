@@ -10,18 +10,17 @@ pub fn init_config(path: &str) -> Result<()> {
             let mut value_list = Vec::new();
             let test_val = crate::env_variables::EnvVariables {
                 name: "TestKey".to_owned(),
-                value: Some("TestValue".to_owned())
+                value: Some("TestValue".to_owned()),
             };
             value_list.push(test_val);
             sets.insert("TestSet".to_owned(), value_list);
             sets
-
         },
     };
 
     let mut configfile = std::fs::File::create(path)?;
     let content = serde_yaml::to_string(&config)?;
-    configfile.write(content.as_bytes())?;
+    configfile.write_all(content.as_bytes())?;
     configfile.flush()?;
     Ok(())
 }
