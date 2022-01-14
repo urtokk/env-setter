@@ -1,6 +1,6 @@
+use clap::ArgMatches;
 use color_eyre::eyre::Result;
 use std::collections::HashMap;
-use clap::ArgMatches;
 
 use crate::env_variables::EnvVariables;
 use crate::env_variables::Shell;
@@ -12,8 +12,7 @@ pub fn set(
 ) -> Result<()> {
     let target_set = matches.value_of("env-set").unwrap().to_owned();
     let var_set = {
-        let set = config_sets
-        .get_mut(&target_set);
+        let set = config_sets.get_mut(&target_set);
 
         match set {
             Some(s) => s,
@@ -45,10 +44,11 @@ pub fn set(
 
     for item in var_set {
         item.print_variables(&shell, output.as_mut())
-        .map_err(|e| {
-            eprintln!("Could not print variables: {}", e);
-            std::process::exit(5)
-        }).ok();
+            .map_err(|e| {
+                eprintln!("Could not print variables: {}", e);
+                std::process::exit(5)
+            })
+            .ok();
     }
 
     Ok(())

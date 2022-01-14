@@ -1,23 +1,17 @@
+use crate::env_variables::{EnvVariables, Shell};
+use serde_derive::{Deserialize, Serialize};
 use std::collections::HashMap;
-use serde_derive::{
-    Serialize,
-    Deserialize
-};
-use crate::env_variables::{
-    EnvVariables,
-    Shell
-};
 
 #[derive(Debug, Serialize, Deserialize)]
 struct ConfigFile {
     shell: Option<Shell>,
-    sets: HashMap<String,Vec<EnvVariables>>,
+    sets: HashMap<String, Vec<EnvVariables>>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct Config {
     pub shell: Shell,
-    pub sets: HashMap<String,Vec<EnvVariables>>,
+    pub sets: HashMap<String, Vec<EnvVariables>>,
 }
 
 pub fn get_config(path: &str) -> Config {

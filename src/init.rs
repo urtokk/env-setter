@@ -10,12 +10,11 @@ pub fn init_config(path: &str) -> Result<()> {
             let mut value_list = Vec::new();
             let test_val = crate::env_variables::EnvVariables {
                 name: "TestKey".to_owned(),
-                value: Some("TestValue".to_owned())
+                value: Some("TestValue".to_owned()),
             };
             value_list.push(test_val);
             sets.insert("TestSet".to_owned(), value_list);
             sets
-
         },
     };
 
