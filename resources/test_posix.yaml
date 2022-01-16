@@ -1,4 +1,4 @@
-shell: POSIX
+shell: Posix
 
 sets:
   test-set:
