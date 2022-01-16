@@ -1,18 +1,23 @@
 use crate::env_variables::EnvVariables;
 use crate::utils;
 use color_eyre::eyre::{eyre, Result};
-use std::{env::set_var, process};
 use std::io::BufRead;
+use std::{env::set_var, process};
 
-pub fn execute<T: BufRead>(var_set: &mut Vec<EnvVariables>, command: &str, source: &mut T) -> Result<String> {
+pub fn execute<T: BufRead>(
+    var_set: &mut Vec<EnvVariables>,
+    command: &str,
+    source: &mut T,
+) -> Result<String> {
     for var in var_set.iter_mut() {
         if let Some(s) = utils::get_input(
             format!(
                 "#{}[{}]: ",
                 var.name,
                 var.value.as_ref().unwrap_or(&"".to_owned())
-            ).as_str(),
-            source
+            )
+            .as_str(),
+            source,
         ) {
             var.value = Some(s);
         }
@@ -46,9 +51,9 @@ pub fn execute<T: BufRead>(var_set: &mut Vec<EnvVariables>, command: &str, sourc
 
 #[cfg(test)]
 mod tests {
-    use std::io::BufReader;
     use super::*;
     use crate::configuration;
+    use std::io::BufReader;
 
     #[test]
     fn test_execute_fish_with_input() {
@@ -80,8 +85,9 @@ mod tests {
         let output = execute(
             &mut target_set,
             "bash resources/scripts/echo_anothertest.sh",
-            &mut prepared_input)
-            .unwrap();
+            &mut prepared_input,
+        )
+        .unwrap();
 
         assert_eq!(output, "test\n");
     }
