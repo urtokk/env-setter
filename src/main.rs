@@ -1,4 +1,8 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg, SubCommand};
+use std::io::{
+    BufReader,
+    stdin
+};
 
 mod configuration;
 mod env_variables;
@@ -108,7 +112,7 @@ fn main() {
                 }
             };
             let command = matches.value_of("command").unwrap();
-            match execute::execute(target_set, command) {
+            match execute::execute(target_set, command, &mut BufReader::new(stdin())) {
                 Ok(output) => println!("{}", output),
                 Err(e) => {
                     eprintln!("Could not execute command: {}", e);
