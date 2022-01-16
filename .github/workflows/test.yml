@@ -23,4 +23,4 @@ jobs:
           toolchain: nightly
           override: true
       - name: Generate test result and coverage report
-        run: cargo test $CARGO_OPTIONS -- -Z unstable-options --format json | cargo2junit > results.xml;
+        run: cargo test $CARGO_OPTIONS --bin env-setter
