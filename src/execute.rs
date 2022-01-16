@@ -91,4 +91,61 @@ mod tests {
 
         assert_eq!(output, "test\n");
     }
+
+    #[test]
+    fn test_execute_bash_with_input() {
+        let mut prepared_input = BufReader::new("test\n".as_bytes());
+        let mut config = configuration::get_config("resources/test_posix.yaml");
+        let mut target_set = {
+            match crate::utils::get_target_set(&mut config.sets, "another-set") {
+                Ok(s) => s,
+                Err(e) => panic!("{}", e),
+            }
+        };
+
+        let output = execute(&mut target_set, "echo 1", &mut prepared_input).unwrap();
+
+        assert_eq!(output, "1\n");
+    }
+
+    #[test]
+    fn test_bash_env_var() {
+        let mut prepared_input = BufReader::new("test\n".as_bytes());
+        let mut config = configuration::get_config("resources/test_posix.yaml");
+        let mut target_set = {
+            match crate::utils::get_target_set(&mut config.sets, "another-set") {
+                Ok(s) => s,
+                Err(e) => panic!("{}", e),
+            }
+        };
+
+        let output = execute(
+            &mut target_set,
+            "bash resources/scripts/echo_anothertest.sh",
+            &mut prepared_input,
+        )
+        .unwrap();
+
+        assert_eq!(output, "test\n");
+    }
+
+    #[test]
+    fn test_empty_command_fails() {
+        let mut prepared_input = BufReader::new("test\n".as_bytes());
+        let mut config = configuration::get_config("resources/test.yaml");
+        let mut target_set = {
+            match crate::utils::get_target_set(&mut config.sets, "another-set") {
+                Ok(s) => s,
+                Err(e) => panic!("{}", e),
+            }
+        };
+
+        let output = execute(
+            &mut target_set,
+            "",
+            &mut prepared_input,
+        );
+
+        assert!(output.is_err());
+    }
 }
