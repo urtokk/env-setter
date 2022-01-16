@@ -29,3 +29,47 @@ pub(crate) fn get_input<T: BufRead>(prompt: &str, source: &mut T) -> Option<Stri
         Err(_) => None,
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::io::BufReader;
+
+    #[test]
+    fn test_get_input() {
+        let mut prepared_input = BufReader::new("test\n".as_bytes());
+        let mut prepared_empty_input = BufReader::new("\n".as_bytes());
+        assert_eq!(
+            get_input("test", &mut prepared_input),
+            Some("test".to_owned())
+        );
+        assert_eq!(
+            get_input("test", &mut prepared_empty_input),
+            Some("".to_owned())
+        );
+    }
+
+    #[test]
+    fn test_fish_get_target_set() {
+        let mut config = crate::configuration::get_config("resources/test.yaml");
+        let target_set = get_target_set(&mut config.sets, "test-set");
+        assert!(target_set.is_ok());
+        assert_eq!(target_set.as_ref().unwrap().len(), 2);
+        assert_eq!(
+            target_set.as_ref().unwrap().get(0).unwrap().name,
+            "TESTKEY".to_owned()
+        );
+    }
+
+    #[test]
+    fn test_bash_get_target_set() {
+        let mut config = crate::configuration::get_config("resources/test_posix.yaml");
+        let target_set = get_target_set(&mut config.sets, "test-set");
+        assert!(target_set.is_ok());
+        assert_eq!(target_set.as_ref().unwrap().len(), 2);
+        assert_eq!(
+            target_set.as_ref().unwrap().get(0).unwrap().name,
+            "TESTKEY".to_owned()
+        );
+    }
+}
