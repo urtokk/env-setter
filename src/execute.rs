@@ -140,11 +140,7 @@ mod tests {
             }
         };
 
-        let output = execute(
-            &mut target_set,
-            "",
-            &mut prepared_input,
-        );
+        let output = execute(&mut target_set, "", &mut prepared_input);
 
         assert!(output.is_err());
     }
