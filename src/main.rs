@@ -1,8 +1,5 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg, SubCommand};
-use std::io::{
-    BufReader,
-    stdin
-};
+use std::io::{stdin, BufReader};
 
 mod configuration;
 mod env_variables;
