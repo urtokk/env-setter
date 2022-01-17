@@ -55,7 +55,7 @@ mod tests {
     use std::io::BufReader;
 
     #[test]
-    fn test_fish_envVariables_load ()  {
+    fn test_fish_envVariables_load() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test.yaml");
         let mut target_set = {
