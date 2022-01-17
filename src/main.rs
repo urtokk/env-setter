@@ -79,11 +79,28 @@ fn main() {
         Some("set") => {
             let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
+            let mut output: Box<dyn std::io::Write> = {
+                if matches.is_present("stdout") {
+                    Box::new(std::io::stdout())
+                } else {
+                    let path = matches.value_of("pipe").unwrap();
+                    let file = std::fs::File::create(path);
+
+                    if let Ok(f) = file {
+                        Box::new(std::io::BufWriter::new(f))
+                    } else {
+                        eprintln!("Failed to create File: {}", path);
+                        std::process::exit(4);
+                    }
+                }
+            };
+
             set::set(
                 &mut config.sets,
                 config.shell,
                 matches,
                 &mut BufReader::new(stdin()),
+                &mut output,
             )
             .map_err(|e| {
                 eprintln!("Error setting environment: {}", e);

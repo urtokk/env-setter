@@ -6,12 +6,17 @@ use crate::env_variables::EnvVariables;
 use crate::env_variables::Shell;
 use crate::utils;
 
-pub fn set<T: std::io::BufRead>(
+pub fn set<R,W>(
     config_sets: &mut HashMap<String, Vec<EnvVariables>>,
     shell: Shell,
     matches: &ArgMatches,
-    source: &mut T,
-) -> Result<()> {
+    source: &mut R,
+    target: &mut W,
+) -> Result<()>
+where
+    R: std::io::BufRead,
+    W: std::io::Write,
+ {
     let target_set = matches.value_of("env-set").unwrap().to_owned();
     let var_set = {
         let set = config_sets.get_mut(&target_set);
@@ -25,21 +30,6 @@ pub fn set<T: std::io::BufRead>(
         }
     };
 
-    let mut output: Box<dyn std::io::Write> = {
-        if matches.is_present("stdout") {
-            Box::new(std::io::stdout())
-        } else {
-            let path = matches.value_of("pipe").unwrap();
-            let file = std::fs::File::create(path);
-
-            if let Ok(f) = file {
-                Box::new(std::io::BufWriter::new(f))
-            } else {
-                eprintln!("Failed to create File: {}", path);
-                std::process::exit(4);
-            }
-        }
-    };
     for item in var_set.iter_mut() {
         if let Some(s) = utils::get_input(
             format!(
@@ -55,7 +45,7 @@ pub fn set<T: std::io::BufRead>(
     }
 
     for item in var_set {
-        item.print_variables(&shell, output.as_mut())
+        item.print_variables(&shell, &mut target)
             .map_err(|e| {
                 eprintln!("Could not print variables: {}", e);
                 std::process::exit(5)
@@ -64,4 +54,9 @@ pub fn set<T: std::io::BufRead>(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
 }
