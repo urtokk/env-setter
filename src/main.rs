@@ -79,7 +79,7 @@ fn main() {
         Some("set") => {
             let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
-            set::set(&mut config.sets, config.shell, matches)
+            set::set(&mut config.sets, config.shell, matches, &mut BufReader::new(stdin()))
                 .map_err(|e| {
                     eprintln!("Error setting environment: {}", e);
                     std::process::exit(6)
