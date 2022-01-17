@@ -1,5 +1,4 @@
 use color_eyre::eyre::Result;
-use read_input::prelude::*;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -50,23 +49,34 @@ impl EnvVariables {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::configuration;
-    use crate::utils;
-    use std::io::BufReader;
 
     #[test]
-    fn test_fish_envVariables_load() {
-        let mut prepared_input = BufReader::new("test\n".as_bytes());
-        let mut config = configuration::get_config("resources/test.yaml");
-        let mut target_set = {
-            match crate::utils::get_target_set(&mut config.sets, "another-set") {
-                Ok(s) => s,
-                Err(e) => panic!("{}", e),
-            }
+    fn test_fish_env_variables_print() {
+        let env_variables = EnvVariables {
+            name: "TEST".to_string(),
+            value: Some("test".to_string()),
         };
 
-        assert_eq!(target_set.len(), 1);
-        assert!(target_set[0].name == "ANOTHERTEST");
-        assert!(target_set[0].value.is_none());
+        let mut destination = Vec::new();
+        env_variables.print_variables(&Shell::Fish, &mut destination).unwrap();
+        assert_eq!(
+            String::from_utf8_lossy(&destination),
+            "set TEST test\n"
+        );
+    }
+
+    #[test]
+    fn test_posix_env_variables_print() {
+        let env_variables = EnvVariables {
+            name: "TEST".to_string(),
+            value: Some("test".to_string()),
+        };
+
+        let mut destination = Vec::new();
+        env_variables.print_variables(&Shell::Posix, &mut destination).unwrap();
+        assert_eq!(
+            String::from_utf8_lossy(&destination),
+            "TEST=test\n"
+        );
     }
 }
