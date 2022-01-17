@@ -73,7 +73,13 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(prepared_output, String::from_utf8_lossy(&catched_output));
+        assert_eq!(
+            String::from_utf8_lossy(&catched_output)
+                .matches(prepared_output.as_str())
+                .into_iter()
+                .count(),
+            1
+        );
     }
 
     #[test]
@@ -101,6 +107,12 @@ mod tests {
         )
         .unwrap();
 
-        assert_eq!(prepared_output, String::from_utf8_lossy(&catched_output));
+        assert_eq!(
+            String::from_utf8_lossy(&catched_output)
+                .matches(prepared_output.as_str())
+                .into_iter()
+                .count(),
+            1
+        );
     }
 }
