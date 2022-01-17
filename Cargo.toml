@@ -13,7 +13,6 @@ clap = "2.33"
 config = "0.11"
 serde_derive = "1.0"
 serde = "1.0"
-read_input = "0.8"
 color-eyre = "0.5"
 serde_yaml = "0.8"
 
