@@ -1,4 +1,3 @@
-use clap::ArgMatches;
 use color_eyre::eyre::Result;
 
 use crate::env_variables::EnvVariables;
