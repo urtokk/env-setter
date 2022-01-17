@@ -95,10 +95,20 @@ fn main() {
                 }
             };
 
+            let target_set = {
+                let target = matches.value_of("target").unwrap();
+                match utils::get_target_set(&mut config.sets, target) {
+                    Ok(target) => target,
+                    Err(e) => {
+                        eprintln!("Could not determine target set: {}", e);
+                        std::process::exit(7)
+                    }
+                }
+            };
+
             set::set(
-                &mut config.sets,
+                &mut target_set,
                 config.shell,
-                matches,
                 &mut BufReader::new(stdin()),
                 &mut output,
             )

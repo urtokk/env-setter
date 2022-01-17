@@ -1,15 +1,13 @@
 use clap::ArgMatches;
 use color_eyre::eyre::Result;
-use std::collections::HashMap;
 
 use crate::env_variables::EnvVariables;
 use crate::env_variables::Shell;
 use crate::utils;
 
 pub fn set<R,W>(
-    config_sets: &mut HashMap<String, Vec<EnvVariables>>,
+    var_set: &mut Vec<EnvVariables>,
     shell: Shell,
-    matches: &ArgMatches,
     source: &mut R,
     target: &mut W,
 ) -> Result<()>
