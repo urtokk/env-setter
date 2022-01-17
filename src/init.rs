@@ -40,7 +40,10 @@ mod tests {
         assert_eq!(config.sets.len(), 1);
         assert_eq!(config.sets["TestSet"].len(), 1);
         assert_eq!(config.sets["TestSet"][0].name, "TestKey");
-        assert_eq!(config.sets["TestSet"][0].value, Some("TestValue".to_owned()));
+        assert_eq!(
+            config.sets["TestSet"][0].value,
+            Some("TestValue".to_owned())
+        );
         std::fs::remove_file(path).unwrap();
     }
 }
