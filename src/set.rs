@@ -5,7 +5,7 @@ use crate::env_variables::EnvVariables;
 use crate::env_variables::Shell;
 use crate::utils;
 
-pub fn set<R,W>(
+pub fn set<R, W>(
     var_set: &mut Vec<EnvVariables>,
     shell: Shell,
     source: &mut R,
@@ -14,20 +14,7 @@ pub fn set<R,W>(
 where
     R: std::io::BufRead,
     W: std::io::Write,
- {
-    let target_set = matches.value_of("env-set").unwrap().to_owned();
-    let var_set = {
-        let set = config_sets.get_mut(&target_set);
-
-        match set {
-            Some(s) => s,
-            None => {
-                eprintln!("Set {} was not found", &target_set);
-                std::process::exit(3);
-            }
-        }
-    };
-
+{
     for item in var_set.iter_mut() {
         if let Some(s) = utils::get_input(
             format!(
@@ -57,4 +44,61 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::io::BufReader;
+
+    #[test]
+    fn test_set_fish() {
+        let mut var_set = vec![
+            EnvVariables {
+                name: "TEST_VAR".to_owned(),
+                value: Some("changeme".to_owned()),
+            },
+            EnvVariables {
+                name: "TEST_VAR2".to_owned(),
+                value: Some("test2".to_owned()),
+            },
+        ];
+
+        let mut prepared_input = BufReader::new("test\n\n".as_bytes());
+        let prepared_output = "set TEST_VAR test\nset TEST_VAR2 test2".to_owned();
+        let mut catched_output = Vec::new();
+
+        set(
+            &mut var_set,
+            Shell::Fish,
+            &mut prepared_input,
+            &mut catched_output,
+        )
+        .unwrap();
+
+        assert_eq!(prepared_output, String::from_utf8_lossy(&catched_output));
+    }
+
+    #[test]
+    fn test_set_posix() {
+        let mut var_set = vec![
+            EnvVariables {
+                name: "TEST_VAR".to_owned(),
+                value: Some("changeme".to_owned()),
+            },
+            EnvVariables {
+                name: "TEST_VAR2".to_owned(),
+                value: Some("test2".to_owned()),
+            },
+        ];
+
+        let mut prepared_input = BufReader::new("test\n\n".as_bytes());
+        let prepared_output = "TEST_VAR=test\nTEST_VAR2=test2".to_owned();
+        let mut catched_output = Vec::new();
+
+        set(
+            &mut var_set,
+            Shell::Posix,
+            &mut prepared_input,
+            &mut catched_output,
+        )
+        .unwrap();
+
+        assert_eq!(prepared_output, String::from_utf8_lossy(&catched_output));
+    }
 }
