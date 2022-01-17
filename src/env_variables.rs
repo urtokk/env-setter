@@ -58,11 +58,10 @@ mod tests {
         };
 
         let mut destination = Vec::new();
-        env_variables.print_variables(&Shell::Fish, &mut destination).unwrap();
-        assert_eq!(
-            String::from_utf8_lossy(&destination),
-            "set TEST test\n"
-        );
+        env_variables
+            .print_variables(&Shell::Fish, &mut destination)
+            .unwrap();
+        assert_eq!(String::from_utf8_lossy(&destination), "set TEST test\n");
     }
 
     #[test]
@@ -73,10 +72,9 @@ mod tests {
         };
 
         let mut destination = Vec::new();
-        env_variables.print_variables(&Shell::Posix, &mut destination).unwrap();
-        assert_eq!(
-            String::from_utf8_lossy(&destination),
-            "TEST=test\n"
-        );
+        env_variables
+            .print_variables(&Shell::Posix, &mut destination)
+            .unwrap();
+        assert_eq!(String::from_utf8_lossy(&destination), "TEST=test\n");
     }
 }
