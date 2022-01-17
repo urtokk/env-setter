@@ -4,11 +4,13 @@ use std::collections::HashMap;
 
 use crate::env_variables::EnvVariables;
 use crate::env_variables::Shell;
+use crate::utils;
 
-pub fn set(
+pub fn set<T: std::io::BufRead>(
     config_sets: &mut HashMap<String, Vec<EnvVariables>>,
     shell: Shell,
     matches: &ArgMatches,
+    source: &mut T,
 ) -> Result<()> {
     let target_set = matches.value_of("env-set").unwrap().to_owned();
     let var_set = {
@@ -39,7 +41,17 @@ pub fn set(
         }
     };
     for item in var_set.iter_mut() {
-        item.ask_user_input();
+        if let Some(s) = utils::get_input(
+            format!(
+                "#{}[{}]: ",
+                item.name,
+                item.value.as_ref().unwrap_or(&"".to_owned())
+            )
+            .as_str(),
+            source,
+        ) {
+            item.value = Some(s);
+        }
     }
 
     for item in var_set {
