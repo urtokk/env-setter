@@ -141,7 +141,12 @@ fn main() {
                 }
             };
             let command = matches.value_of("command").unwrap();
-            match execute::execute(target_set, command, &mut BufReader::new(stdin())) {
+            match execute::execute(
+                target_set,
+                command,
+                &mut BufReader::new(stdin()),
+                &mut std::io::stdout(),
+            ) {
                 Ok(output) => println!("{}", output),
                 Err(e) => {
                     eprintln!("Could not execute command: {}", e);

@@ -2,12 +2,14 @@ use crate::env_variables::EnvVariables;
 use crate::utils;
 use color_eyre::eyre::{eyre, Result};
 use std::io::BufRead;
+use std::io::Write;
 use std::{env::set_var, process};
 
-pub fn execute<T: BufRead>(
+pub fn execute<T: BufRead, W: Write>(
     var_set: &mut Vec<EnvVariables>,
     command: &str,
     source: &mut T,
+    destination: &mut W,
 ) -> Result<String> {
     for var in var_set.iter_mut() {
         if let Some(s) = utils::get_input(
@@ -18,6 +20,7 @@ pub fn execute<T: BufRead>(
             )
             .as_str(),
             source,
+            destination,
         ) {
             var.value = Some(s);
         }
@@ -59,6 +62,7 @@ mod tests {
     fn test_execute_fish_with_input() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test.yaml");
+        let mut catched_output = Vec::new();
         let mut target_set = {
             match crate::utils::get_target_set(&mut config.sets, "another-set") {
                 Ok(s) => s,
@@ -66,7 +70,13 @@ mod tests {
             }
         };
 
-        let output = execute(&mut target_set, "echo 1", &mut prepared_input).unwrap();
+        let output = execute(
+            &mut target_set,
+            "echo 1",
+            &mut prepared_input,
+            &mut catched_output,
+        )
+        .unwrap();
 
         assert_eq!(output, "1\n");
     }
@@ -75,6 +85,7 @@ mod tests {
     fn test_fish_env_var() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test.yaml");
+        let mut catched_output = Vec::new();
         let mut target_set = {
             match crate::utils::get_target_set(&mut config.sets, "another-set") {
                 Ok(s) => s,
@@ -86,6 +97,7 @@ mod tests {
             &mut target_set,
             "bash resources/scripts/echo_anothertest.sh",
             &mut prepared_input,
+            &mut catched_output,
         )
         .unwrap();
 
@@ -96,6 +108,7 @@ mod tests {
     fn test_execute_bash_with_input() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test_posix.yaml");
+        let mut catched_output = Vec::new();
         let mut target_set = {
             match crate::utils::get_target_set(&mut config.sets, "another-set") {
                 Ok(s) => s,
@@ -103,7 +116,13 @@ mod tests {
             }
         };
 
-        let output = execute(&mut target_set, "echo 1", &mut prepared_input).unwrap();
+        let output = execute(
+            &mut target_set,
+            "echo 1",
+            &mut prepared_input,
+            &mut catched_output,
+        )
+        .unwrap();
 
         assert_eq!(output, "1\n");
     }
@@ -112,6 +131,7 @@ mod tests {
     fn test_bash_env_var() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test_posix.yaml");
+        let mut catched_output = Vec::new();
         let mut target_set = {
             match crate::utils::get_target_set(&mut config.sets, "another-set") {
                 Ok(s) => s,
@@ -123,6 +143,7 @@ mod tests {
             &mut target_set,
             "bash resources/scripts/echo_anothertest.sh",
             &mut prepared_input,
+            &mut catched_output,
         )
         .unwrap();
 
@@ -133,6 +154,7 @@ mod tests {
     fn test_empty_command_fails() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut config = configuration::get_config("resources/test.yaml");
+        let mut catched_output = Vec::new();
         let mut target_set = {
             match crate::utils::get_target_set(&mut config.sets, "another-set") {
                 Ok(s) => s,
@@ -140,7 +162,12 @@ mod tests {
             }
         };
 
-        let output = execute(&mut target_set, "", &mut prepared_input);
+        let output = execute(
+            &mut target_set,
+            "",
+            &mut prepared_input,
+            &mut catched_output,
+        );
 
         assert!(output.is_err());
     }

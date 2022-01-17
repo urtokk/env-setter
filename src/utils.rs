@@ -2,6 +2,7 @@ use color_eyre::eyre::{eyre, Result};
 
 use std::collections::HashMap;
 use std::io::BufRead;
+use std::io::Write;
 
 use crate::env_variables::EnvVariables;
 
@@ -15,8 +16,18 @@ pub(crate) fn get_target_set<'a, 'b>(
     }
 }
 
-pub(crate) fn get_input<T: BufRead>(prompt: &str, source: &mut T) -> Option<String> {
-    print!("{}", prompt);
+pub(crate) fn get_input<T: BufRead, W: Write>(
+    prompt: &str,
+    source: &mut T,
+    destination: &mut W,
+) -> Option<String> {
+    destination
+        .write_all(prompt.as_bytes())
+        .map_err(|e| {
+            eprintln!("Could not write to destination: {}", e);
+            std::process::exit(5)
+        })
+        .ok();
     let mut user_input = String::new();
     match source.read_line(&mut user_input) {
         Ok(_) => {
@@ -39,12 +50,14 @@ mod tests {
     fn test_get_input() {
         let mut prepared_input = BufReader::new("test\n".as_bytes());
         let mut prepared_empty_input = BufReader::new("\n".as_bytes());
+        let mut catched_output = Vec::new();
         assert_eq!(
-            get_input("test", &mut prepared_input),
+            get_input("test", &mut prepared_input, &mut catched_output),
             Some("test".to_owned())
         );
+        catched_output.clear();
         assert_eq!(
-            get_input("test", &mut prepared_empty_input),
+            get_input("test", &mut prepared_empty_input, &mut catched_output),
             Some("".to_owned())
         );
     }
