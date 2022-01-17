@@ -16,22 +16,6 @@ pub struct EnvVariables {
 }
 
 impl EnvVariables {
-    pub fn ask_user_input(&mut self) -> &mut Self {
-        let user_input = input::<String>()
-            .msg(format!(
-                "#{}[{}]: ",
-                self.name,
-                self.value.as_ref().unwrap_or(&"".to_string())
-            ))
-            .get();
-
-        if !user_input.is_empty() {
-            self.value = Some(user_input)
-        }
-
-        self
-    }
-
     pub fn print_variables<T>(&self, shell: &Shell, mut destination: T) -> Result<()>
     where
         T: std::io::Write,
@@ -60,5 +44,29 @@ impl EnvVariables {
         }
         destination.flush()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::configuration;
+    use crate::utils;
+    use std::io::BufReader;
+
+    #[test]
+    fn test_fish_envVariables_load ()  {
+        let mut prepared_input = BufReader::new("test\n".as_bytes());
+        let mut config = configuration::get_config("resources/test.yaml");
+        let mut target_set = {
+            match crate::utils::get_target_set(&mut config.sets, "another-set") {
+                Ok(s) => s,
+                Err(e) => panic!("{}", e),
+            }
+        };
+
+        assert_eq!(target_set.len(), 1);
+        assert!(target_set[0].name == "ANOTHERTEST");
+        assert!(target_set[0].value.is_none());
     }
 }
