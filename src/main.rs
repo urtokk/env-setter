@@ -1,4 +1,5 @@
 use clap::{crate_authors, crate_description, crate_name, crate_version, App, Arg, SubCommand};
+use std::io::{stdin, BufReader};
 
 mod configuration;
 mod env_variables;
@@ -78,12 +79,44 @@ fn main() {
         Some("set") => {
             let mut config = configuration::get_config(configfile);
             let matches = matches.subcommand_matches("set").unwrap();
-            set::set(&mut config.sets, config.shell, matches)
-                .map_err(|e| {
-                    eprintln!("Error setting environment: {}", e);
-                    std::process::exit(6)
-                })
-                .ok();
+            let mut output: Box<dyn std::io::Write> = {
+                if matches.is_present("stdout") {
+                    Box::new(std::io::stdout())
+                } else {
+                    let path = matches.value_of("pipe").unwrap();
+                    let file = std::fs::File::create(path);
+
+                    if let Ok(f) = file {
+                        Box::new(std::io::BufWriter::new(f))
+                    } else {
+                        eprintln!("Failed to create File: {}", path);
+                        std::process::exit(4);
+                    }
+                }
+            };
+
+            let target_set = {
+                let target = matches.value_of("target").unwrap();
+                match utils::get_target_set(&mut config.sets, target) {
+                    Ok(target) => target,
+                    Err(e) => {
+                        eprintln!("Could not determine target set: {}", e);
+                        std::process::exit(7)
+                    }
+                }
+            };
+
+            set::set(
+                target_set,
+                config.shell,
+                &mut BufReader::new(stdin()),
+                &mut output,
+            )
+            .map_err(|e| {
+                eprintln!("Error setting environment: {}", e);
+                std::process::exit(6)
+            })
+            .ok();
         }
         Some("list") => {
             let config = configuration::get_config(configfile);
@@ -108,7 +141,12 @@ fn main() {
                 }
             };
             let command = matches.value_of("command").unwrap();
-            match execute::execute(target_set, command) {
+            match execute::execute(
+                target_set,
+                command,
+                &mut BufReader::new(stdin()),
+                &mut std::io::stdout(),
+            ) {
                 Ok(output) => println!("{}", output),
                 Err(e) => {
                     eprintln!("Could not execute command: {}", e);

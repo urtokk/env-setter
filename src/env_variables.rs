@@ -1,5 +1,4 @@
 use color_eyre::eyre::Result;
-use read_input::prelude::*;
 
 use serde_derive::{Deserialize, Serialize};
 
@@ -16,22 +15,6 @@ pub struct EnvVariables {
 }
 
 impl EnvVariables {
-    pub fn ask_user_input(&mut self) -> &mut Self {
-        let user_input = input::<String>()
-            .msg(format!(
-                "#{}[{}]: ",
-                self.name,
-                self.value.as_ref().unwrap_or(&"".to_string())
-            ))
-            .get();
-
-        if !user_input.is_empty() {
-            self.value = Some(user_input)
-        }
-
-        self
-    }
-
     pub fn print_variables<T>(&self, shell: &Shell, mut destination: T) -> Result<()>
     where
         T: std::io::Write,
@@ -60,5 +43,38 @@ impl EnvVariables {
         }
         destination.flush()?;
         Ok(())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_fish_env_variables_print() {
+        let env_variables = EnvVariables {
+            name: "TEST".to_string(),
+            value: Some("test".to_string()),
+        };
+
+        let mut destination = Vec::new();
+        env_variables
+            .print_variables(&Shell::Fish, &mut destination)
+            .unwrap();
+        assert_eq!(String::from_utf8_lossy(&destination), "set TEST test\n");
+    }
+
+    #[test]
+    fn test_posix_env_variables_print() {
+        let env_variables = EnvVariables {
+            name: "TEST".to_string(),
+            value: Some("test".to_string()),
+        };
+
+        let mut destination = Vec::new();
+        env_variables
+            .print_variables(&Shell::Posix, &mut destination)
+            .unwrap();
+        assert_eq!(String::from_utf8_lossy(&destination), "TEST=test\n");
     }
 }

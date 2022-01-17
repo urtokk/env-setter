@@ -24,3 +24,26 @@ pub fn init_config(path: &str) -> Result<()> {
     configfile.flush()?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::configuration;
+    use crate::env_variables;
+
+    #[test]
+    fn test_init_config() {
+        let path = "./test_config.yml";
+        init_config(path).unwrap();
+        let config = configuration::get_config(path);
+        matches!(config.shell, env_variables::Shell::Posix);
+        assert_eq!(config.sets.len(), 1);
+        assert_eq!(config.sets["TestSet"].len(), 1);
+        assert_eq!(config.sets["TestSet"][0].name, "TestKey");
+        assert_eq!(
+            config.sets["TestSet"][0].value,
+            Some("TestValue".to_owned())
+        );
+        std::fs::remove_file(path).unwrap();
+    }
+}

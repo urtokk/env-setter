@@ -28,3 +28,24 @@ pub fn get_config(path: &str) -> Config {
 
     config
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_config_posix() {
+        let config = get_config("resources/test_posix.yaml");
+        matches!(config.shell, Shell::Posix);
+        assert_eq!(config.sets.len(), 2);
+        assert_eq!(config.sets["test-set"].len(), 2);
+    }
+
+    #[test]
+    fn test_config_fish() {
+        let config = get_config("resources/test.yaml");
+        matches!(config.shell, Shell::Fish);
+        assert_eq!(config.sets.len(), 2);
+        assert_eq!(config.sets["test-set"].len(), 2);
+    }
+}
