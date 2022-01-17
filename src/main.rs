@@ -107,7 +107,7 @@ fn main() {
             };
 
             set::set(
-                &mut target_set,
+                target_set,
                 config.shell,
                 &mut BufReader::new(stdin()),
                 &mut output,
