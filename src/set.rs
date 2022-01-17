@@ -62,7 +62,7 @@ mod tests {
         ];
 
         let mut prepared_input = BufReader::new("test\n\n".as_bytes());
-        let prepared_output = "set TEST_VAR test\nset TEST_VAR2 test2".to_owned();
+        let prepared_output = "set TEST_VAR test\nset TEST_VAR2 test2\n".to_owned();
         let mut catched_output = Vec::new();
 
         set(
@@ -90,7 +90,7 @@ mod tests {
         ];
 
         let mut prepared_input = BufReader::new("test\n\n".as_bytes());
-        let prepared_output = "TEST_VAR=test\nTEST_VAR2=test2".to_owned();
+        let prepared_output = "TEST_VAR=test\nTEST_VAR2=test2\n".to_owned();
         let mut catched_output = Vec::new();
 
         set(
