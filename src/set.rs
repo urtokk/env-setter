@@ -30,7 +30,7 @@ where
     }
 
     for item in var_set {
-        item.print_variables(&shell, &mut target)
+        item.print_variables(&shell, target.by_ref())
             .map_err(|e| {
                 eprintln!("Could not print variables: {}", e);
                 std::process::exit(5)
