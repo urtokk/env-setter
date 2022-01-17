@@ -1,3 +1,4 @@
+
 use color_eyre::eyre::Result;
 
 use crate::env_variables::EnvVariables;
@@ -24,7 +25,9 @@ where
             .as_str(),
             source,
         ) {
-            item.value = Some(s);
+            if !s.is_empty() {
+                item.value = Some(s);
+            }
         }
     }
 
