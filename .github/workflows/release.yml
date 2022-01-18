@@ -34,7 +34,7 @@ jobs:
       - name: Install cargo-deb crate
         uses: actions-rs/install@v0.1
         with:
-          name: cargo-deb
+          crate: cargo-deb
           version: latest
           use-tool-cache: true
       - name: Release Build
