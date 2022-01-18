@@ -45,7 +45,7 @@ jobs:
       - name: Create archive
         env:
           PACKAGE_VERSION: $(cat Cargo.toml | grep version | head -1 | awk '{print $3}' | tr -d '"')
-        run: tar cfvz target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
+        run: tar cfvz target/release/env-setter_${{ steps.release-version.outputs.version }}.tar.gz target/release/env-setter
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
