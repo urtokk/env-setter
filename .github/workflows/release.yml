@@ -36,7 +36,6 @@ jobs:
         with:
           name: cargo-deb
           version: latest
-          use-tool-cache: true
       - name: Release Build
         uses: actions-rs/cargo@v1
         with:
