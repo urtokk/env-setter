@@ -32,8 +32,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install cargo-deb crate
-        run: |
-          cargo install cargo-deb
+        run: if [ ! -f ~/.cargo/bin/cargo-deb ]; then cargo install cargo-deb; fi
       - name: Release Build
         uses: actions-rs/cargo@v1
         with:
