@@ -42,16 +42,16 @@ jobs:
         with:
           command: deb
       - name: Create archive
-        run: tar cfz target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
+        run: tar cfz target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PROJECT_NAME_UNDERSCORE }}
-          path: target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).deb
+          name: env-setter deb
+          path: target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2)_amd64.deb
           mime-type: application/vnd.debian.binary-package
       - name: Upload zip Artifact
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.PROJECT_NAME_UNDERSCORE }}
-          path: target/release/${{ env.PROJECT_NAME_UNDERSCORE }}_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz
+          name: env-setter tar.gz
+          path: target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz
           mime-type: application/gzip
