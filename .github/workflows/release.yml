@@ -38,15 +38,21 @@ jobs:
         with:
           command: deb
       - name: Create archive
-        run: tar cfz target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
+        env:
+          PACKAGE_VERSION: $(cat Cargo.toml | grep version | head -1 | awk '{print $3}' | tr -d '"')
+        run: tar cfvz target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz target/release/env-setter
       - name: 'Upload Artifact'
         uses: actions/upload-artifact@v2
+        env:
+          PACKAGE_VERSION: $(cat Cargo.toml | grep version | head -1 | awk '{print $3}' | tr -d '"')
         with:
           name: env-setter deb
-          path: target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2)_amd64.deb
+          path: /home/runner/worker/env-setter/target/debian/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2)_amd64.deb
           mime-type: application/vnd.debian.binary-package
       - name: Upload zip Artifact
         uses: actions/upload-artifact@v2
+        env:
+          PACKAGE_VERSION: $(cat Cargo.toml | grep version | head -1 | awk '{print $3}' | tr -d '"')
         with:
           name: env-setter tar.gz
           path: target/release/env-setter_$(grep version Cargo.toml | cut -d '"' -f 2).tar.gz
