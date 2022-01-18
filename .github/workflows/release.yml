@@ -32,10 +32,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install cargo-deb crate
-        uses: actions-rs/install@v0.1
-        with:
-          name: cargo-deb
-          version: latest
+        run: |
+          cargo install cargo-deb
       - name: Release Build
         uses: actions-rs/cargo@v1
         with:
